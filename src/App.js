@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import InsightsView from "./InsightsView";
+import InsightsView from './InsightsView';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 function DashboardNav({ step, onBack, onRestart }) {
@@ -88,9 +88,8 @@ export default function App() {
     const message = goalText || userInput.trim();
     if (!message) return;
     const step = followUps.step;
-    const newChat = [{ sender: 'user', text: message }];
+    let newChat = [{ sender: 'user', text: message }];
 
-    // Handle follow-up prompts first
     if (message === 'Compare with other promotions') {
       const otherPromo = promoTemplates[1];
       setChat(prev => [...prev, ...newChat, { sender: 'bot', text: `📊 Here's another promo option: <strong>${otherPromo.promoType}</strong> with ROI of ${otherPromo.predictedROI}.` }]);
