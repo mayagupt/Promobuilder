@@ -8,7 +8,7 @@ function App() {
     const message = goalText || userInput.trim();
     if (!message) return;
     const newMessage = { sender: 'user', text: message };
-    setChat(prev => [...prev, newMessage]);
+    // Removed duplicate user message injection
 
     const step = followUps.step;
     const newChat = [{ sender: 'user', text: message }];
@@ -68,7 +68,16 @@ function App() {
           promoCopy: 'Deal Alert: 10% off everything this weekend only!'
         }
       ];
-      const chosen = promoTemplates[Math.floor(Math.random() * promoTemplates.length)];
+      const goal = followUps.goal?.toLowerCase() || '';
+      const filteredTemplates = promoTemplates.filter(promo => {
+        if (goal.includes('visibility')) return promo.promoType.includes('Coupon');
+        if (goal.includes('inventory')) return promo.promoType.includes('Deal');
+        if (goal.includes('short-term') || goal.includes('boost')) return promo.promoType.includes('Buy 2');
+        if (goal.includes('repeat') || goal.includes('retention')) return promo.promoType.includes('Credit');
+        if (goal.includes('launch')) return promo.promoType.includes('Credit');
+        return true;
+      });
+      const chosen = filteredTemplates.length > 0 ? filteredTemplates[Math.floor(Math.random() * filteredTemplates.length)] : promoTemplates[0];
       setSuggestion(chosen);
       newChat.push({ sender: 'bot', type: 'summary', content: chosen });
     }
