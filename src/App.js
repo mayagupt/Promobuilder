@@ -1,136 +1,229 @@
 // Smart Promo Designer with Back, Restart and Step Tracker
-import React, { useState, useEffect, useRef } from 'react';
-import './styles.css';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import React, { useState, useEffect, useRef } from "react";
+import "./styles.css";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 function App() {
+  const [initialized, setInitialized] = useState(false);
   const handleUserMessage = (goalText = null) => {
     const message = goalText || userInput.trim();
     if (!message) return;
-    const newMessage = { sender: 'user', text: message };
+    const newMessage = { sender: "user", text: message };
     // Removed duplicate user message injection
 
     const step = followUps.step;
-    const newChat = [{ sender: 'user', text: message }];
+    const newChat = [{ sender: "user", text: message }];
 
     if (step === 0) {
-      setFollowUps(prev => ({ ...prev, goal: message, step: 1 }));
-      newChat.push({ sender: 'bot', text: 'What is your budget for this promotion?' });
+      setFollowUps((prev) => ({ ...prev, goal: message, step: 1 }));
+      newChat.push({
+        sender: "bot",
+        text: "What is your budget for this promotion?",
+      });
     } else if (step === 1) {
-      setFollowUps(prev => ({ ...prev, budget: message, step: 2 }));
-      newChat.push({ sender: 'bot', text: 'Is there a margin you want to maintain? (optional)' });
+      setFollowUps((prev) => ({ ...prev, budget: message, step: 2 }));
+      newChat.push({
+        sender: "bot",
+        text: "Is there a margin you want to maintain? (optional)",
+      });
     } else if (step === 2) {
-      setFollowUps(prev => ({ ...prev, margin: message, step: 3 }));
-      newChat.push({ sender: 'bot', text: 'When would you like to run this promotion?' });
+      setFollowUps((prev) => ({ ...prev, margin: message, step: 3 }));
+      newChat.push({
+        sender: "bot",
+        text: "When would you like to run this promotion?",
+      });
     } else if (step === 3) {
-      setFollowUps(prev => ({ ...prev, duration: message, step: 4 }));
-      newChat.push({ sender: 'bot', text: 'Thanks! Calculating your best promo suggestion...' });
+      setFollowUps((prev) => ({ ...prev, duration: message, step: 4 }));
+      newChat.push({
+        sender: "bot",
+        text: "Thanks! Calculating your best promo suggestion...",
+      });
 
       const promoTemplates = [
         {
-          promoType: 'Coupon - 5% Off',
-          predictedROI: '14%',
+          promoType: "Coupon - 5% Off",
+          predictedROI: "14%",
           expectedSales: 950,
           expectedValue: 28500,
           expectedMargin: 5700,
-          why: 'Low-effort incentive that boosts conversion without harming margin too much.',
-          risk: 'Easily overused; can reduce perceived product value.',
-          promoCopy: 'Save 5% instantly with this coupon – limited time only!'
+          why: "Low-effort incentive that boosts conversion without harming margin too much.",
+          risk: "Easily overused; can reduce perceived product value.",
+          promoCopy: "Save 5% instantly with this coupon – limited time only!",
         },
         {
-          promoType: 'Buy 2 Get 5% Off',
-          predictedROI: '17%',
+          promoType: "Buy 2 Get 5% Off",
+          predictedROI: "17%",
           expectedSales: 1100,
           expectedValue: 33000,
           expectedMargin: 6600,
-          why: 'Increases average order size and encourages volume purchases.',
-          risk: 'Not all customers may want to buy multiple units.',
-          promoCopy: 'Buy any 2 items and get 5% off your total – mix & match!'
+          why: "Increases average order size and encourages volume purchases.",
+          risk: "Not all customers may want to buy multiple units.",
+          promoCopy: "Buy any 2 items and get 5% off your total – mix & match!",
         },
         {
-          promoType: 'Buy $50 Get $20 Credit',
-          predictedROI: '20%',
+          promoType: "Buy $50 Get $20 Credit",
+          predictedROI: "20%",
           expectedSales: 1250,
           expectedValue: 37500,
           expectedMargin: 7500,
-          why: 'Boosts cart size and brings customers back with credit.',
-          risk: 'Credit may not be redeemed or used efficiently.',
-          promoCopy: 'Spend $50 and get $20 in store credit – shop more, save more!'
+          why: "Boosts cart size and brings customers back with credit.",
+          risk: "Credit may not be redeemed or used efficiently.",
+          promoCopy:
+            "Spend $50 and get $20 in store credit – shop more, save more!",
         },
         {
-          promoType: 'Deal - 10% Off',
-          predictedROI: '18%',
+          promoType: "Deal - 10% Off",
+          predictedROI: "18%",
           expectedSales: 1150,
           expectedValue: 34500,
           expectedMargin: 6900,
-          why: 'Straightforward discount with high appeal and easy execution.',
-          risk: 'Could train buyers to wait for deals.',
-          promoCopy: 'Deal Alert: 10% off everything this weekend only!'
-        }
+          why: "Straightforward discount with high appeal and easy execution.",
+          risk: "Could train buyers to wait for deals.",
+          promoCopy: "Deal Alert: 10% off everything this weekend only!",
+        },
       ];
-      const goal = followUps.goal?.toLowerCase() || '';
-      const filteredTemplates = promoTemplates.filter(promo => {
-        if (goal.includes('visibility')) return promo.promoType.includes('Coupon');
-        if (goal.includes('inventory')) return promo.promoType.includes('Deal');
-        if (goal.includes('short-term') || goal.includes('boost')) return promo.promoType.includes('Buy 2');
-        if (goal.includes('repeat') || goal.includes('retention')) return promo.promoType.includes('Credit');
-        if (goal.includes('launch')) return promo.promoType.includes('Credit');
+      const goal = followUps.goal?.toLowerCase() || "";
+      const filteredTemplates = promoTemplates.filter((promo) => {
+        if (goal.includes("visibility"))
+          return promo.promoType.includes("Coupon");
+        if (goal.includes("inventory")) return promo.promoType.includes("Deal");
+        if (goal.includes("short-term") || goal.includes("boost"))
+          return promo.promoType.includes("Buy 2");
+        if (goal.includes("repeat") || goal.includes("retention"))
+          return promo.promoType.includes("Credit");
+        if (goal.includes("launch")) return promo.promoType.includes("Credit");
         return true;
       });
-      const chosen = filteredTemplates.length > 0 ? filteredTemplates[Math.floor(Math.random() * filteredTemplates.length)] : promoTemplates[0];
+      const chosen =
+        filteredTemplates.length > 0
+          ? filteredTemplates[
+              Math.floor(Math.random() * filteredTemplates.length)
+            ]
+          : promoTemplates[0];
       setSuggestion(chosen);
-      newChat.push({ sender: 'bot', type: 'summary', content: chosen });
+      newChat.push({ sender: "bot", type: "summary", content: chosen });
+
+      // Add comparison chart data as separate message
+      newChat.push({ sender: "bot", type: "insight", content: promoTemplates });
+
+      // Add timing suggestion
+      const timingTip =
+        followUps.duration?.toLowerCase().includes("weekend") ||
+        followUps.duration?.toLowerCase().includes("friday")
+          ? "Tip: Promotions tend to perform better when launched before or during weekends."
+          : "Tip: Try launching this promo before Friday for higher engagement.";
+      newChat.push({ sender: "bot", text: timingTip });
     }
 
-    setChat(prev => [...prev, ...newChat]);
-    setUserInput('');
+    setChat((prev) => [...prev, ...newChat]);
+    setUserInput("");
   };
-  const stepLabels = ['Goal', 'Budget', 'Margin', 'Duration', 'Suggestion'];
+  const stepLabels = ["Goal", "Budget", "Margin", "Duration", "Suggestion"];
   const suggestedGoals = [
-    { label: 'Increase visibility', icon: '🔍' },
-    { label: 'Clear out old inventory', icon: '📦' },
-    { label: 'Boost short-term sales', icon: '⚡' },
-    { label: 'Drive repeat purchases', icon: '🔁' },
-    { label: 'Launch a new product', icon: '🚀' }
+    { label: "Increase visibility", icon: "🔍" },
+    { label: "Clear out old inventory", icon: "📦" },
+    { label: "Boost short-term sales", icon: "⚡" },
+    { label: "Drive repeat purchases", icon: "🔁" },
+    { label: "Launch a new product", icon: "🚀" },
   ];
   const [chat, setChat] = useState([]);
-  const [userInput, setUserInput] = useState('');
+  const [userInput, setUserInput] = useState("");
   const [suggestion, setSuggestion] = useState(null);
   const [images, setImages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
-  const [followUps, setFollowUps] = useState({ step: 0, goal: null, budget: null, margin: null, duration: null });
+  const [followUps, setFollowUps] = useState({
+    step: 0,
+    goal: null,
+    budget: null,
+    margin: null,
+    duration: null,
+  });
   const chatEndRef = useRef(null);
+  useEffect(() => {
+    if (initialized) return;
+    const params = new URLSearchParams(window.location.search);
+    const sku = params.get("sku");
+    if (sku) {
+      const skuGoalMap = {
+        SKU123: "Increase visibility",
+        SKU124: "Clear out old inventory",
+        SKU125: "Boost short-term sales",
+        SKU126: "Drive repeat purchases",
+      };
+      const defaultGoal = skuGoalMap[sku];
+      if (defaultGoal) handleUserMessage(defaultGoal);
+    }
+    setInitialized(true);
+  }, [initialized]);
 
   const handleBack = () => {
-    setChat(prev => prev.slice(0, -2));
-    setFollowUps(prev => ({ ...prev, step: prev.step - 1 }));
+    setChat((prev) => prev.slice(0, -2));
+    setFollowUps((prev) => ({ ...prev, step: prev.step - 1 }));
   };
 
   const handleRestart = () => {
     setChat([]);
-    setFollowUps({ step: 0, goal: null, budget: null, margin: null, duration: null });
-    setUserInput('');
+    setFollowUps({
+      step: 0,
+      goal: null,
+      budget: null,
+      margin: null,
+      duration: null,
+    });
+    setInitialized(false);
+    setUserInput("");
     setSuggestion(null);
     setImages([]);
   };
 
   return (
-    <div style={{ padding: '1rem', maxWidth: '800px', margin: 'auto' }}>
+    <div style={{ padding: "1rem", maxWidth: "800px", margin: "auto" }}>
       <h1>Smart Promo Designer</h1>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-        <button onClick={handleBack} disabled={followUps.step === 0}>← Back</button>
-        <span>Step {followUps.step + 1} of 5: {stepLabels[followUps.step]}</span>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: "1rem",
+        }}
+      >
+        <button onClick={handleBack} disabled={followUps.step === 0}>
+          ← Back
+        </button>
+        <span>
+          Step {followUps.step + 1} of 5: {stepLabels[followUps.step]}
+        </span>
         <button onClick={handleRestart}>⟳ Restart</button>
       </div>
 
       {followUps.step === 0 && (
-        <div style={{ marginBottom: '1rem' }}>
+        <div style={{ marginBottom: "1rem" }}>
           <strong>Popular Goals:</strong>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "0.5rem",
+              marginTop: "0.5rem",
+            }}
+          >
             {suggestedGoals.map((goal, idx) => (
               <button
                 key={idx}
-                style={{ padding: '0.5rem 1rem', borderRadius: '20px', background: '#eee', border: 'none', cursor: 'pointer' }}
+                style={{
+                  padding: "0.5rem 1rem",
+                  borderRadius: "20px",
+                  background: "#eee",
+                  border: "none",
+                  cursor: "pointer",
+                }}
                 onClick={() => handleUserMessage(goal.label)}
               >
                 {goal.icon} {goal.label}
@@ -140,61 +233,175 @@ function App() {
         </div>
       )}
 
-      <div style={{ border: '1px solid #ccc', padding: '1rem', borderRadius: '8px', background: '#f9f9f9', minHeight: '300px', maxHeight: '60vh', overflowY: 'auto' }}>
+      <div
+        style={{
+          border: "1px solid #ccc",
+          padding: "1rem",
+          borderRadius: "8px",
+          background: "#f9f9f9",
+          minHeight: "300px",
+          maxHeight: "60vh",
+          overflowY: "auto",
+        }}
+      >
         {chat.map((msg, idx) => (
-          <div key={idx} style={{ marginBottom: '1rem', textAlign: msg.sender === 'user' ? 'right' : 'left' }}>
-            {msg.type === 'summary' ? (
-              <div style={{ background: '#eef1f4', padding: '1rem', borderRadius: '8px' }}>
-                <p><strong>Type:</strong> {msg.content.promoType}</p>
-                <p><strong>ROI:</strong> {msg.content.predictedROI}</p>
-                <p><strong>Why:</strong> {msg.content.why}</p>
-                <p><strong>Risk:</strong> {msg.content.risk}</p>
-                <p><strong>Copy:</strong> {msg.content.promoCopy}</p>
-                <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <div
+            key={idx}
+            style={{
+              marginBottom: "1rem",
+              textAlign: msg.sender === "user" ? "right" : "left",
+            }}
+          >
+            {msg.type === "summary" ? (
+              <div
+                style={{
+                  background: "#eef1f4",
+                  padding: "1rem",
+                  borderRadius: "8px",
+                }}
+              >
+                <p>
+                  <strong>Type:</strong> {msg.content.promoType}{" "}
+                  <span
+                    style={{
+                      fontSize: "0.85em",
+                      background: "#e6f4ea",
+                      padding: "0.2em 0.5em",
+                      borderRadius: "12px",
+                      marginLeft: "0.5em",
+                    }}
+                  >
+                    {msg.content.promoType.includes("Credit")
+                      ? "🔁 Retention Friendly"
+                      : msg.content.promoType.includes("Buy")
+                      ? "📦 Volume Booster"
+                      : msg.content.promoType.includes("Coupon")
+                      ? "💡 Low Effort"
+                      : "🔥 High Appeal"}
+                  </span>
+                </p>
+                <p>
+                  <strong>ROI:</strong> {msg.content.predictedROI}
+                </p>
+                <p>
+                  <strong>Why:</strong> {msg.content.why}
+                </p>
+                <p>
+                  <strong>Risk:</strong> {msg.content.risk}
+                </p>
+                <p
+                  style={{
+                    marginTop: "0.5rem",
+                    fontStyle: "italic",
+                    fontSize: "0.9em",
+                    color: "#555",
+                  }}
+                >
+                  <button
+                    onClick={() =>
+                      window.open(
+                        "https://smartpromo.vercel.app/insights",
+                        "_blank"
+                      )
+                    }
+                    style={{
+                      background: "#f0f0f0",
+                      border: "none",
+                      borderRadius: "8px",
+                      padding: "0.4rem 0.8rem",
+                      cursor: "pointer",
+                    }}
+                  >
+                    🔍 Show more insights
+                  </button>
+                </p>
+                <div
+                  style={{
+                    marginTop: "1rem",
+                    display: "flex",
+                    gap: "0.5rem",
+                    flexWrap: "wrap",
+                  }}
+                >
                   {images.map((url, i) => (
-                    <img key={i} src={url} alt={`related-${i}`} style={{ width: '120px', borderRadius: '8px' }} onError={(e) => { e.target.style.display = 'none'; }} />
+                    <img
+                      key={i}
+                      src={url}
+                      alt={`related-${i}`}
+                      style={{ width: "120px", borderRadius: "8px" }}
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                      }}
+                    />
                   ))}
                 </div>
-                <div style={{ marginTop: '1rem' }}>
+                <div style={{ marginTop: "1rem" }}>
                   <ResponsiveContainer width="100%" height={250}>
-                    <BarChart data={[
-                      { name: 'With Promo', value: msg.content.expectedValue, margin: msg.content.expectedMargin },
-                      { name: 'No Promo', value: msg.content.expectedValue * 0.75, margin: msg.content.expectedMargin * 0.6 }
-                    ]}>
+                    <BarChart
+                      data={[
+                        {
+                          name: "With Promo",
+                          value: msg.content.expectedValue,
+                          margin: msg.content.expectedMargin,
+                        },
+                        {
+                          name: "No Promo",
+                          value: msg.content.expectedValue * 0.75,
+                          margin: msg.content.expectedMargin * 0.6,
+                        },
+                      ]}
+                    >
                       <XAxis dataKey="name" />
                       <YAxis />
                       <Tooltip />
                       <Legend />
                       <Bar dataKey="value" fill="#8884d8" name="Sales ($)" />
-                      <Bar dataKey="margin" fill="#82ca9d" name="Net Margin ($)" />
+                      <Bar
+                        dataKey="margin"
+                        fill="#82ca9d"
+                        name="Net Margin ($)"
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               </div>
             ) : (
-              <span style={{ background: msg.sender === 'user' ? '#d1e7dd' : '#e2e3e5', padding: '0.5rem 1rem', borderRadius: '16px', display: 'inline-block' }}>
+              <span
+                style={{
+                  background: msg.sender === "user" ? "#d1e7dd" : "#e2e3e5",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "16px",
+                  display: "inline-block",
+                }}
+              >
                 {msg.text}
               </span>
             )}
           </div>
         ))}
-        {isTyping && <div style={{ fontStyle: 'italic' }}>Bot is typing...</div>}
+        {isTyping && (
+          <div style={{ fontStyle: "italic" }}>Bot is typing...</div>
+        )}
         <div ref={chatEndRef} />
       </div>
 
-      <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
+      <div style={{ marginTop: "1rem", display: "flex", gap: "0.5rem" }}>
         <input
           type="text"
           value={userInput}
-          onChange={e => setUserInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleUserMessage()}
+          onChange={(e) => setUserInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleUserMessage()}
           placeholder="Type your answer..."
-          style={{ flex: 1, padding: '0.5rem' }}
+          style={{ flex: 1, padding: "0.5rem" }}
         />
-        <button onClick={() => handleUserMessage()} style={{ padding: '0.5rem 1rem' }}>Send</button>
+        <button
+          onClick={() => handleUserMessage()}
+          style={{ padding: "0.5rem 1rem" }}
+        >
+          Send
+        </button>
       </div>
     </div>
-  
   );
 }
 
