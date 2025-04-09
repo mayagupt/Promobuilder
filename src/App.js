@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import AnalyticsView from "./AnalyticsView";
+import AnalyticsView from "./InsightsView";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 function DashboardNav({ step, onBack, onRestart }) {
@@ -176,7 +176,7 @@ export default function App() {
           <div key={i} style={{ textAlign: msg.sender === 'user' ? 'right' : 'left', marginBottom: '0.5rem' }}>
             {msg.type === 'insights' ? (
               <div>
-                <AnalyticsView data={showAllSKUs ? insightsData : insightsData.filter(sku => sku.sku === 'SKU123')} />
+                <InsightsView data={showAllSKUs ? insightsData : insightsData.filter(sku => sku.sku === 'SKU123')} />
                 <div style={{ marginTop: '1rem' }}>
                   <label>
                     <input type="checkbox" checked={showAllSKUs} onChange={() => setShowAllSKUs(prev => !prev)} /> Show all SKUs
