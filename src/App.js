@@ -155,12 +155,20 @@ function App() {
         setSuggestion(chosen);
         const keywordImages =
           followUps.goal?.match(/\b\w+\b/g)?.slice(0, 3) || [];
-        const fetchedImages = keywordImages.map(
-          (keyword, index) =>
-            `https://source.unsplash.com/400x300/?${encodeURIComponent(
+        const fetchedImages = keywordImages.map((keyword, index) => {
+          if (keyword.toLowerCase().includes("visibility")) {
+            return "https://m.media-amazon.com/images/I/71V--WZVUIL._AC_SL1500_.jpg";
+          } else if (keyword.toLowerCase().includes("inventory")) {
+            return "https://m.media-amazon.com/images/I/61v+V5GhPUL._AC_SL1500_.jpg";
+          } else if (keyword.toLowerCase().includes("launch")) {
+            return "https://m.media-amazon.com/images/I/71UQe0Pcr7L._AC_SL1500_.jpg";
+          } else {
+            // fallback to generic product image
+            return `https://source.unsplash.com/400x300/?${encodeURIComponent(
               keyword
-            )}&sig=${index}`
-        );
+            )}&sig=${index}`;
+          }
+        });
         setImages(fetchedImages);
         setChat((prev) => [
           ...prev,
@@ -181,7 +189,6 @@ function App() {
         style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
           marginBottom: "1rem",
         }}
       >
@@ -196,26 +203,28 @@ function App() {
 
       {followUps.step === 0 && (
         <div style={{ marginBottom: "1rem" }}>
-          <strong style={{ display: "block", marginBottom: "0.5rem" }}>
-            Popular Goals:
-          </strong>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-            {suggestedGoals.map((goal, index) => (
+          <strong>Popular Goals:</strong>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "0.5rem",
+              marginTop: "0.5rem",
+            }}
+          >
+            {suggestedGoals.map((goal, idx) => (
               <button
-                key={index}
+                key={idx}
                 style={{
                   padding: "0.5rem 1rem",
-                  background: "#e9ecef",
                   borderRadius: "20px",
+                  background: "#eee",
                   border: "none",
                   cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
                 }}
                 onClick={() => handleUserMessage(goal.label)}
               >
-                <span>{goal.icon}</span> {goal.label}
+                {goal.icon} {goal.label}
               </button>
             ))}
           </div>
@@ -227,10 +236,10 @@ function App() {
           border: "1px solid #ccc",
           padding: "1rem",
           borderRadius: "8px",
-          minHeight: "300px",
           background: "#f9f9f9",
-          overflowY: "auto",
+          minHeight: "300px",
           maxHeight: "60vh",
+          overflowY: "auto",
         }}
       >
         {chat.map((msg, idx) => (
@@ -244,43 +253,72 @@ function App() {
             {msg.type === "summary" ? (
               <div
                 style={{
-                  background: "#f1f3f5",
+                  background: "#eef1f4",
                   padding: "1rem",
                   borderRadius: "8px",
-                  marginTop: "1rem",
                 }}
               >
                 <p>
                   <strong>Type:</strong> {msg.content.promoType}
                 </p>
                 <p>
-                  <strong>Predicted ROI:</strong> {msg.content.predictedROI}
+                  <strong>ROI:</strong> {msg.content.predictedROI}
                 </p>
                 <p>
-                  <strong>Reason:</strong> {msg.content.why}
+                  <strong>Why:</strong> {msg.content.why}
                 </p>
                 <p>
-                  <strong>Risks:</strong> {msg.content.risk}
+                  <strong>Risk:</strong> {msg.content.risk}
                 </p>
                 <p>
-                  <strong>Suggested Copy:</strong> {msg.content.promoCopy}
+                  <strong>Copy:</strong> {msg.content.promoCopy}
                 </p>
                 <div
                   style={{
-                    display: "flex",
-                    gap: "1rem",
-                    flexWrap: "wrap",
                     marginTop: "1rem",
+                    display: "flex",
+                    gap: "0.5rem",
+                    flexWrap: "wrap",
                   }}
                 >
-                  {images.map((url, idx) => (
+                  {images.map((url, i) => (
                     <img
-                      key={idx}
+                      key={i}
                       src={url}
-                      alt="Product"
-                      style={{ width: "150px", borderRadius: "8px" }}
+                      alt={`related-${i}`}
+                      style={{ width: "120px", borderRadius: "8px" }}
+                      onError={(e) => (e.target.style.display = "none")}
                     />
                   ))}
+                </div>
+                <div style={{ marginTop: "1rem" }}>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <BarChart
+                      data={[
+                        {
+                          name: "With Promo",
+                          value: msg.content.expectedValue,
+                          margin: msg.content.expectedMargin,
+                        },
+                        {
+                          name: "No Promo",
+                          value: msg.content.expectedValue * 0.75,
+                          margin: msg.content.expectedMargin * 0.6,
+                        },
+                      ]}
+                    >
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="value" fill="#8884d8" name="Sales ($)" />
+                      <Bar
+                        dataKey="margin"
+                        fill="#82ca9d"
+                        name="Net Margin ($)"
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
             ) : (
@@ -303,20 +341,13 @@ function App() {
         <div ref={chatEndRef} />
       </div>
 
-      <div
-        style={{
-          marginTop: "1rem",
-          display: "flex",
-          gap: "0.5rem",
-          flexWrap: "wrap",
-        }}
-      >
+      <div style={{ marginTop: "1rem", display: "flex", gap: "0.5rem" }}>
         <input
           type="text"
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleUserMessage()}
-          placeholder="Describe your goal or answer the question..."
+          placeholder="Type your answer..."
           style={{ flex: 1, padding: "0.5rem" }}
         />
         <button
