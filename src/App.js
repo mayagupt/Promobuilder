@@ -114,37 +114,37 @@ function App() {
     setUserInput("");
 
     const step = followUps.step;
+    let newMessages = [{ sender: "user", text: message }];
+
     if (step === 0) {
       setFollowUps((prev) => ({ ...prev, goal: message, step: 1 }));
-      setChat((prev) => [
-        ...prev,
-        { sender: "user", text: message },
-        { sender: "bot", text: "What is your budget for this promotion?" },
-      ]);
+      newMessages.push({
+        sender: "bot",
+        text: "What is your budget for this promotion?",
+      });
+      setChat((prev) => [...prev, ...newMessages]);
     } else if (step === 1) {
       setFollowUps((prev) => ({
         ...prev,
         budget: message.toLowerCase(),
         step: 2,
       }));
-      setChat((prev) => [
-        ...prev,
-        { sender: "user", text: message },
-        {
-          sender: "bot",
-          text: "Is there a specific margin you want to maintain? (optional)",
-        },
-      ]);
+      newMessages.push({
+        sender: "bot",
+        text: "Is there a specific margin you want to maintain? (optional)",
+      });
+      setChat((prev) => [...prev, ...newMessages]);
     } else if (step === 2) {
       setFollowUps((prev) => ({ ...prev, margin: message, step: 3 }));
-      setChat((prev) => [
-        ...prev,
-        { sender: "user", text: message },
-        { sender: "bot", text: "When do you want to run this promotion?" },
-      ]);
+      newMessages.push({
+        sender: "bot",
+        text: "When do you want to run this promotion?",
+      });
+      setChat((prev) => [...prev, ...newMessages]);
     } else if (step === 3) {
       setFollowUps((prev) => ({ ...prev, duration: message, step: 4 }));
-      setChat((prev) => [...prev, { sender: "user", text: message }]);
+      setChat((prev) => [...prev, ...newMessages]);
+
       setIsTyping(true);
       setTimeout(() => {
         setIsTyping(false);
