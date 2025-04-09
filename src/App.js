@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import AnalyticsView from './src/AnalyticsView';
+import AnalyticsView from 'AnalyticsView';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 function DashboardNav({ step, onBack, onRestart }) {
