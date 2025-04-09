@@ -1,6 +1,6 @@
 // Smart Promo Designer with Back, Restart and Step Tracker
 import React, { useState, useEffect, useRef } from 'react';
-import './styles.css';
+import './App.css';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 function App() {
@@ -117,18 +117,19 @@ function App() {
         const chosen = promoTemplates.find(t => t.suitability.includes(followUps.budget)) || promoTemplates[0];
         setSuggestion(chosen);
         const keywordImages = followUps.goal?.match(/\b\w+\b/g)?.slice(0, 3) || [];
-        const fetchedImages = keywordImages.map((keyword, index) => {
-  if (keyword.toLowerCase().includes('visibility')) {
-    return "https://m.media-amazon.com/images/I/71V--WZVUIL._AC_SL1500_.jpg";
-  } else if (keyword.toLowerCase().includes('inventory')) {
-    return "https://m.media-amazon.com/images/I/61v+V5GhPUL._AC_SL1500_.jpg";
-  } else if (keyword.toLowerCase().includes('launch')) {
-    return "https://m.media-amazon.com/images/I/71UQe0Pcr7L._AC_SL1500_.jpg";
-  } else {
-    // fallback to generic product image
-    return `https://source.unsplash.com/400x300/?${encodeURIComponent(keyword)}&sig=${index}`;
-  }
-});
+        setImages(
+  keywordImages.map((keyword, index) => {
+    if (keyword.toLowerCase().includes('visibility')) {
+      return "https://m.media-amazon.com/images/I/71V--WZVUIL._AC_SL1500_.jpg";
+    } else if (keyword.toLowerCase().includes('inventory')) {
+      return "https://m.media-amazon.com/images/I/61v+V5GhPUL._AC_SL1500_.jpg";
+    } else if (keyword.toLowerCase().includes('launch')) {
+      return "https://m.media-amazon.com/images/I/71UQe0Pcr7L._AC_SL1500_.jpg";
+    } else {
+      return `https://source.unsplash.com/400x300/?${encodeURIComponent(keyword)}&sig=${index}`;
+    }
+  })
+);
         setImages(fetchedImages);
         setChat(prev => [...prev, { sender: 'bot', text: 'Here is your personalized promotion suggestion:' }, { sender: 'bot', type: 'summary', content: chosen }]);
       }, 1200);
