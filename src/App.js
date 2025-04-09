@@ -1,3 +1,4 @@
+// Smart Promo Designer with Back, Restart and Step Tracker
 import React, { useState, useEffect, useRef } from "react";
 import "./styles.css";
 import {
@@ -29,6 +30,22 @@ function App() {
     setChat((prev) => prev.slice(0, -2));
     setFollowUps((prev) => ({ ...prev, step: prev.step - 1 }));
   };
+
+  const handleRestart = () => {
+    setChat([]);
+    setFollowUps({
+      step: 0,
+      goal: null,
+      budget: null,
+      margin: null,
+      duration: null,
+    });
+    setUserInput("");
+    setSuggestion(null);
+    setImages([]);
+  };
+
+  const stepLabels = ["Goal", "Budget", "Margin", "Duration", "Suggestion"];
 
   const suggestedGoals = [
     { label: "Increase visibility", category: "Visibility", icon: "🔍" },
@@ -95,6 +112,7 @@ function App() {
     if (!message) return;
 
     setUserInput("");
+
     const step = followUps.step;
     if (step === 0) {
       setFollowUps((prev) => ({ ...prev, goal: message, step: 1 }));
@@ -127,7 +145,6 @@ function App() {
     } else if (step === 3) {
       setFollowUps((prev) => ({ ...prev, duration: message, step: 4 }));
       setChat((prev) => [...prev, { sender: "user", text: message }]);
-
       setIsTyping(true);
       setTimeout(() => {
         setIsTyping(false);
@@ -137,7 +154,7 @@ function App() {
           ) || promoTemplates[0];
         setSuggestion(chosen);
         const keywordImages =
-          followUps.goal.match(/\b\w+\b/g)?.slice(0, 3) || [];
+          followUps.goal?.match(/\b\w+\b/g)?.slice(0, 3) || [];
         const fetchedImages = keywordImages.map(
           (keyword, index) =>
             `https://source.unsplash.com/400x300/?${encodeURIComponent(
@@ -157,60 +174,25 @@ function App() {
     }
   };
 
-  const renderBotBlock = (content) => (
-    <div
-      style={{
-        background: "#f1f3f5",
-        padding: "1rem",
-        borderRadius: "8px",
-        marginTop: "1rem",
-      }}
-    >
-      <p>
-        <strong>Type:</strong> {content.promoType}
-      </p>
-      <p>
-        <strong>Predicted ROI:</strong> {content.predictedROI}
-      </p>
-      <p>
-        <strong>Reason:</strong> {content.why}
-      </p>
-      <p>
-        <strong>Risks:</strong> {content.risk}
-      </p>
-      <p>
-        <strong>Suggested Copy:</strong> {content.promoCopy}
-      </p>
-      <div
-        style={{
-          display: "flex",
-          gap: "1rem",
-          flexWrap: "wrap",
-          marginTop: "1rem",
-        }}
-      >
-        {images.map((url, idx) => (
-          <img
-            key={idx}
-            src={url}
-            alt="Product"
-            style={{ width: "150px", borderRadius: "8px" }}
-          />
-        ))}
-      </div>
-    </div>
-  );
-
   return (
     <div style={{ padding: "1rem", maxWidth: "800px", margin: "auto" }}>
       <h1>Smart Promo Designer</h1>
-      <button
-        onClick={handleBack}
-        disabled={followUps.step === 0}
-        style={{ marginBottom: "1rem" }}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "1rem",
+        }}
       >
-        ← Back
-      </button>
+        <button onClick={handleBack} disabled={followUps.step === 0}>
+          ← Back
+        </button>
+        <span>
+          Step {followUps.step + 1} of 5: {stepLabels[followUps.step]}
+        </span>
+        <button onClick={handleRestart}>⟳ Restart</button>
+      </div>
 
       {followUps.step === 0 && (
         <div style={{ marginBottom: "1rem" }}>
@@ -260,7 +242,47 @@ function App() {
             }}
           >
             {msg.type === "summary" ? (
-              renderBotBlock(msg.content)
+              <div
+                style={{
+                  background: "#f1f3f5",
+                  padding: "1rem",
+                  borderRadius: "8px",
+                  marginTop: "1rem",
+                }}
+              >
+                <p>
+                  <strong>Type:</strong> {msg.content.promoType}
+                </p>
+                <p>
+                  <strong>Predicted ROI:</strong> {msg.content.predictedROI}
+                </p>
+                <p>
+                  <strong>Reason:</strong> {msg.content.why}
+                </p>
+                <p>
+                  <strong>Risks:</strong> {msg.content.risk}
+                </p>
+                <p>
+                  <strong>Suggested Copy:</strong> {msg.content.promoCopy}
+                </p>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "1rem",
+                    flexWrap: "wrap",
+                    marginTop: "1rem",
+                  }}
+                >
+                  {images.map((url, idx) => (
+                    <img
+                      key={idx}
+                      src={url}
+                      alt="Product"
+                      style={{ width: "150px", borderRadius: "8px" }}
+                    />
+                  ))}
+                </div>
+              </div>
             ) : (
               <span
                 style={{
