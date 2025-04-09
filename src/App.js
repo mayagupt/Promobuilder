@@ -1,9 +1,89 @@
 // Smart Promo Designer with Back, Restart and Step Tracker
 import React, { useState, useEffect, useRef } from 'react';
-import './App.css';
+import './styles.css';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 function App() {
+  const handleUserMessage = (goalText = null) => {
+    const message = goalText || userInput.trim();
+    if (!message) return;
+    const newMessage = { sender: 'user', text: message };
+    setChat(prev => [...prev, newMessage]);
+
+    const step = followUps.step;
+    const newChat = [{ sender: 'user', text: message }];
+
+    if (step === 0) {
+      setFollowUps(prev => ({ ...prev, goal: message, step: 1 }));
+      newChat.push({ sender: 'bot', text: 'What is your budget for this promotion?' });
+    } else if (step === 1) {
+      setFollowUps(prev => ({ ...prev, budget: message, step: 2 }));
+      newChat.push({ sender: 'bot', text: 'Is there a margin you want to maintain? (optional)' });
+    } else if (step === 2) {
+      setFollowUps(prev => ({ ...prev, margin: message, step: 3 }));
+      newChat.push({ sender: 'bot', text: 'When would you like to run this promotion?' });
+    } else if (step === 3) {
+      setFollowUps(prev => ({ ...prev, duration: message, step: 4 }));
+      newChat.push({ sender: 'bot', text: 'Thanks! Calculating your best promo suggestion...' });
+
+      const promoTemplates = [
+        {
+          promoType: 'Coupon - 5% Off',
+          predictedROI: '14%',
+          expectedSales: 950,
+          expectedValue: 28500,
+          expectedMargin: 5700,
+          why: 'Low-effort incentive that boosts conversion without harming margin too much.',
+          risk: 'Easily overused; can reduce perceived product value.',
+          promoCopy: 'Save 5% instantly with this coupon – limited time only!'
+        },
+        {
+          promoType: 'Buy 2 Get 5% Off',
+          predictedROI: '17%',
+          expectedSales: 1100,
+          expectedValue: 33000,
+          expectedMargin: 6600,
+          why: 'Increases average order size and encourages volume purchases.',
+          risk: 'Not all customers may want to buy multiple units.',
+          promoCopy: 'Buy any 2 items and get 5% off your total – mix & match!'
+        },
+        {
+          promoType: 'Buy $50 Get $20 Credit',
+          predictedROI: '20%',
+          expectedSales: 1250,
+          expectedValue: 37500,
+          expectedMargin: 7500,
+          why: 'Boosts cart size and brings customers back with credit.',
+          risk: 'Credit may not be redeemed or used efficiently.',
+          promoCopy: 'Spend $50 and get $20 in store credit – shop more, save more!'
+        },
+        {
+          promoType: 'Deal - 10% Off',
+          predictedROI: '18%',
+          expectedSales: 1150,
+          expectedValue: 34500,
+          expectedMargin: 6900,
+          why: 'Straightforward discount with high appeal and easy execution.',
+          risk: 'Could train buyers to wait for deals.',
+          promoCopy: 'Deal Alert: 10% off everything this weekend only!'
+        }
+      ];
+      const chosen = promoTemplates[Math.floor(Math.random() * promoTemplates.length)];
+      setSuggestion(chosen);
+      newChat.push({ sender: 'bot', type: 'summary', content: chosen });
+    }
+
+    setChat(prev => [...prev, ...newChat]);
+    setUserInput('');
+  };
+  const stepLabels = ['Goal', 'Budget', 'Margin', 'Duration', 'Suggestion'];
+  const suggestedGoals = [
+    { label: 'Increase visibility', icon: '🔍' },
+    { label: 'Clear out old inventory', icon: '📦' },
+    { label: 'Boost short-term sales', icon: '⚡' },
+    { label: 'Drive repeat purchases', icon: '🔁' },
+    { label: 'Launch a new product', icon: '🚀' }
+  ];
   const [chat, setChat] = useState([]);
   const [userInput, setUserInput] = useState('');
   const [suggestion, setSuggestion] = useState(null);
@@ -23,8 +103,6 @@ function App() {
     setUserInput('');
     setSuggestion(null);
     setImages([]);
-      }, 1200);
-    }
   };
 
   return (
