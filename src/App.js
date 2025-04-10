@@ -216,7 +216,7 @@ export default function App() {
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleUserMessage()}
-          placeholder="Type your answer..."
+          placeholder="Type your goal or any other question you have..."
           style={{ flex: 1, padding: '0.5rem' }}
         />
         <button onClick={() => handleUserMessage()} style={{ padding: '0.5rem 1rem' }}>Send</button>
