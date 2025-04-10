@@ -48,6 +48,7 @@ function FollowUpPrompts({ onSelect }) {
   ];
   return (
     <div style={{ marginTop: '1rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+    <strong>Here's some other things you can do:</strong>
       {prompts.map((text, i) => (
         <button
           key={i}
