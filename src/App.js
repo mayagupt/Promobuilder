@@ -145,9 +145,10 @@ export default function App() {
     setFollowUps(prev => ({ ...prev, step: Math.max(prev.step - 1, 0) }));
   };
 
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chat]);
+ if (chatEndRef.current) {
+  chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+}
+
 
   const insightsData = [
     { sku: 'SKU123', conversion: 4.5, revenue: 12000, margin: 3200, withPromo: 16000, withMargin: 4500 },
